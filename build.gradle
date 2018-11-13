@@ -66,6 +66,9 @@ buildscript {
     classpath deps.animalSniffer.gradle
     classpath deps.maven.plugin.builder
     classpath deps.maven.plugin.publish
+
+    // figure out how to use local plugin in current sample module
+    classpath "com.squareup.wire:wire-gradle-plugin:${versions.wire}"
   }
 
   repositories {

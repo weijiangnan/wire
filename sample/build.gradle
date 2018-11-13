@@ -1,8 +1,9 @@
-ext {
-  generatedSourcesDir = "${buildDir}/generated/src/java"
-}
+//ext {
+//  generatedSourcesDir = "${buildDir}/generated/src/java"
+//}
 
 apply plugin: 'application'
+apply plugin: 'com.squareup.wire'
 
 mainClassName = 'com.squareup.dinosaurs.Sample'
 
@@ -15,26 +16,20 @@ jar {
   }
 }
 
-configurations {
-  wire
-}
-
 dependencies {
-  wire project(':wire-compiler')
   implementation project(':wire-runtime')
-  implementation deps.okio
 }
 
-task generateProtos(type: JavaExec) {
-  classpath = configurations.wire
-  main = 'com.squareup.wire.WireCompiler'
-  args = [
-      '--proto_path=src/main/proto',
-      "--java_out=$generatedSourcesDir"
-  ]
-}
+//task generateProtos(type: JavaExec) {
+//  classpath = configurations.wire
+//  main = 'com.squareup.wire.WireCompiler'
+//  args = [
+//      '--proto_path=src/main/proto',
+//      "--java_out=$generatedSourcesDir"
+//  ]
+//}
 
-compileJava {
-  dependsOn generateProtos
-  source generatedSourcesDir
-}
+//compileJava {
+//  dependsOn generateProtos
+//  source generatedSourcesDir
+//}
