@@ -46,6 +46,26 @@ class WireCompilerTest {
   }
 
   @Test
+  fun testProtobufNew() {
+    testDir = File("wire-compiler/out")
+
+    val sources = arrayOf("down.proto", "up.proto")
+
+    val args = ArrayList<String>()
+    args.add(TargetLanguage.JAVA_LOCAL.protoPathArg())
+    args.add(TargetLanguage.JAVA_LOCAL.outArg(testDir.absolutePath))
+//    Collections.addAll(args, *extraArgs)
+    Collections.addAll(args, *sources)
+
+    logger = StringWireLogger()
+    val fs = FileSystems.getDefault()
+    val compiler = WireCompiler2.forArgs(fs, logger!!, *args.toTypedArray())
+    compiler.compile()
+
+    testDir = temp.root
+  }
+
+  @Test
   fun testFooBar() {
     val sources = arrayOf("foo.proto", "bar.proto")
     compileToJava(sources)
@@ -451,6 +471,11 @@ class WireCompilerTest {
   private enum class TargetLanguage {
     JAVA {
       override fun protoPathArg() = "--proto_path=../wire-tests/src/test/proto"
+      override fun outArg(testDirPath: String) = "--java_out=$testDirPath"
+      override fun protoFolderSuffix() = "java"
+    },
+    JAVA_LOCAL {
+      override fun protoPathArg() = "--proto_path=wire-compiler/pb"
       override fun outArg(testDirPath: String) = "--java_out=$testDirPath"
       override fun protoFolderSuffix() = "java"
     },
