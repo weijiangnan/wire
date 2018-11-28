@@ -510,6 +510,14 @@ public final class JavaGenerator2 {
         .addStatement("return $N", value)
         .build());
 
+    // TODO: 2018/11/27 wjn add getNumber
+    // Public Getter
+    builder.addMethod(MethodSpec.methodBuilder("getNumber")
+            .addModifiers(PUBLIC)
+            .returns(TypeName.INT)
+            .addStatement("return $N", value)
+            .build());
+
     if (!emitCompact) {
       // Adds the ProtoAdapter implementation at the bottom.
       builder.addType(enumAdapter(javaType, adapterJavaType));
@@ -580,10 +588,12 @@ public final class JavaGenerator2 {
     for (Field field : type.fieldsAndOneOfFields()) {
       TypeName fieldJavaType = fieldType(field);
 
+      String defaultValueName = null;
       if ((field.type().isScalar() || isEnum(field.type()))
           && !field.isRepeated()
           && !field.isPacked()) {
         builder.addField(defaultField(nameAllocator, field, fieldJavaType));
+        defaultValueName = "DEFAULT_" + nameAllocator.get(field).toUpperCase(Locale.US);
       }
 
       String fieldName = nameAllocator.get(field);
@@ -602,7 +612,7 @@ public final class JavaGenerator2 {
         fieldBuilder.addAnnotation(NULLABLE);
       }
       builder.addField(fieldBuilder.build());
-      builder.addMethod(Utils.getter(fieldBuilder.build()));
+      builder.addMethod(Utils.getter(fieldBuilder.build(), defaultValueName));
     }
 
     if (constructorTakesAllFields) {

@@ -49,7 +49,7 @@ class WireCompilerTest {
   fun testProtobufNew() {
     testDir = File("wire-compiler/out")
 
-    val sources = arrayOf("down.proto", "up.proto")
+    val sources = arrayOf("down.proto")
 
     val args = ArrayList<String>()
     args.add(TargetLanguage.JAVA_LOCAL.protoPathArg())
@@ -64,6 +64,8 @@ class WireCompilerTest {
 
     testDir = temp.root
   }
+
+
 
   @Test
   fun testFooBar() {

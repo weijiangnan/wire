@@ -6,6 +6,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.wire.schema.Field;
 import com.squareup.wire.schema.ProtoFile;
 
+import java.util.Locale;
+
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 /**
@@ -22,42 +24,42 @@ public class Utils {
         return sb.toString();
     }
 
-    public static MethodSpec getter(FieldSpec fieldSpec) {
+    public static MethodSpec getter(FieldSpec fieldSpec, String defaultValue) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(getFieldGetterName(fieldSpec));
 
+        String defaultNullStatement = null;
         if (fieldSpec.type.equals(TypeName.BOOLEAN.box())) {
-            builder.addStatement("if($N == null) return false", fieldSpec.name);
-            builder.addStatement("return $N", fieldSpec.name);
+            defaultNullStatement = String.format("if($N == null) return false", fieldSpec.name);
             builder.returns(TypeName.BOOLEAN);
         } else if (fieldSpec.type.equals(TypeName.BYTE.box())) {
-            builder.addStatement("if($N == null) return 0", fieldSpec.name);
-            builder.addStatement("return $N", fieldSpec.name);
+            defaultNullStatement = String.format("if($N == null) return 0", fieldSpec.name);
             builder.returns(TypeName.BYTE);
         } else if (fieldSpec.type.equals(TypeName.SHORT.box())) {
-            builder.addStatement("if($N == null) return 0", fieldSpec.name);
-            builder.addStatement("return $N", fieldSpec.name);
+            defaultNullStatement = String.format("if($N == null) return 0", fieldSpec.name);
             builder.returns(TypeName.SHORT);
         } else if (fieldSpec.type.equals(TypeName.INT.box())) {
-            builder.addStatement("if($N == null) return 0", fieldSpec.name);
-            builder.addStatement("return $N", fieldSpec.name);
+            defaultNullStatement = String.format("if($N == null) return 0", fieldSpec.name);
             builder.returns(TypeName.INT);
         } else if (fieldSpec.type.equals(TypeName.LONG.box())) {
-            builder.addStatement("if($N == null) return 0L", fieldSpec.name);
-            builder.addStatement("return $N", fieldSpec.name);
+            defaultNullStatement = String.format("if($N == null) return 0L", fieldSpec.name);
             builder.returns(TypeName.LONG);
         } else if (fieldSpec.type.equals(TypeName.FLOAT.box())) {
-            builder.addStatement("if($N == null) return 0f", fieldSpec.name);
-            builder.addStatement("return $N", fieldSpec.name);
+            defaultNullStatement = String.format("if($N == null) return 0f", fieldSpec.name);
             builder.returns(TypeName.FLOAT);
         } else if (fieldSpec.type.equals(TypeName.DOUBLE.box())) {
-            builder.addStatement("if($N == null) return 0.0", fieldSpec.name);
-            builder.addStatement("return $N", fieldSpec.name);
+            defaultNullStatement = String.format("if($N == null) return 0.0", fieldSpec.name);
             builder.returns(TypeName.DOUBLE);
         } else {
-            builder.addStatement("return $N", fieldSpec.name);
             builder.returns(fieldSpec.type);
         }
 
+        if (defaultValue != null && !defaultValue.isEmpty()) {
+            builder.addStatement("if($1N == null) return $2N", fieldSpec.name, defaultValue);
+        } else if (defaultNullStatement != null && !defaultNullStatement.isEmpty()) {
+            builder.addStatement(defaultNullStatement);
+        }
+
+        builder.addStatement("return $N", fieldSpec.name);
         builder.addModifiers(PUBLIC);
 
         return builder.build();
@@ -77,12 +79,12 @@ public class Utils {
             }
         }}
 
-        if (fieldSpec.type.equals(TypeName.BOOLEAN.box())
-                && (name.startsWith("is") || name.startsWith("has"))) {
-            // do nothing
-        } else {
+//        if (fieldSpec.type.equals(TypeName.BOOLEAN.box())
+//                && (name.startsWith("is") || name.startsWith("has"))) {
+//            // do nothing
+//        } else {
             sb.insert(0, "get");
-        }
+//        }
 
         if (fieldSpec.type.toString().contains("java.util.List")) {
             if (!name.endsWith("List")) {
@@ -150,5 +152,9 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static String getDefaultFiedName(String name) {
+        return "DEFAULT_" + name.toUpperCase(Locale.US);
     }
 }
